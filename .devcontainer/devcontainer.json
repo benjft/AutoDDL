@@ -12,7 +12,8 @@
 	// Configure tool-specific properties.
   "customizations" : {
     "jetbrains" : {
-      "backend" : "GoLand"
+      "backend" : "GoLand",
+      extensions: ["com.intellij.ml.llm", "izhangzhihao.rainbow.brackets"]
     }
   },
 
