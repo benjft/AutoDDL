@@ -3,10 +3,8 @@ name: Go Build and Test
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
-    branches:
-      - main
 
 jobs:
   build:
@@ -14,22 +12,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: 1.22
-
-      - name: Cache Go modules
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
 
       - name: Install dependencies
         run: go mod download
@@ -40,11 +28,47 @@ jobs:
       - name: Run tests with coverage
         run: go test -v -coverprofile=coverage.out ./...
 
-      - name: Upload test coverage result
-        uses: actions/upload-artifact@v3
+      - name: Get coverage percent
+        id: coverage
+        run: |
+          grep -v auto_ddl.go coverage.out > filtered_coverage.out
+          coverage=$(go tool cover -func=filtered_coverage.out | grep "^total:" | awk '{print $3}')
+          echo "coverage=$coverage" >> "$GITHUB_OUTPUT"
+
+          coverage_value=$(echo $coverage | sed 's/%//')
+          echo "coverage_value=$coverage_value" >> "$GITHUB_OUTPUT"
+
+          if (( $(echo "$coverage_value > 80" | bc -l) )); then
+            echo "coverage_pass=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "coverage_pass=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update coverage badge
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch
         with:
-          name: coverage-report
-          path: coverage.out
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 933444616076e2b4ed18818dc7c907d5
+          filename: coverage-master.json
+          label: Test Coverage - Master
+          message: ${{ steps.coverage.outputs.coverage }}
+          valColorRange: ${{ steps.coverage.outputs.coverage_value }}
+          maxColorRange: 90
+          minColorRange: 50
+
+      - name: Update PR coverage badge
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        if: github.event_name == 'pull_request' && github.base_ref == github.event.repository.default_branch
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 933444616076e2b4ed18818dc7c907d5
+          filename: coverage-PR.json
+          label: Test Coverage - PRs
+          message: ${{ steps.coverage.outputs.coverage }}
+          valColorRange: ${{ steps.coverage.outputs.coverage_value }}
+          maxColorRange: 90
+          minColorRange: 50
 
       - name: Print coverage result
         if: success()
