@@ -52,7 +52,7 @@ jobs:
           filename: coverage-master.json
           label: Test Coverage
           message: ${{ steps.coverage.outputs.coverage }}
-          color: ${{ steps.coverage.outputs.coverage_pass == 'true' && 'green' || 'red' }}
+          color: ${{ steps.coverage.outputs.coverage_pass == 'true' && '#2db64c' || 'red' }}
 
       - name: Print coverage result
         if: success()
