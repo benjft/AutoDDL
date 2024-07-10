@@ -43,7 +43,7 @@ jobs:
       - name: Get coverage percent
         id: coverage
         run: |
-          coverage=(go tool cover -func=coverage.out | grep "^total:" | awk '{print $3}')
+          coverage=$(go tool cover -func=coverage.out | grep "^total:" | awk '{print $3}')
           echo "coverage=$coverage" >> "$GITHUB_OUTPUT"
 
           coverage_value=$(echo $coverage_result | sed 's/%//')
