@@ -50,7 +50,7 @@ jobs:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 933444616076e2b4ed18818dc7c907d5
           filename: coverage-master.json
-          label: Test Coverage
+          label: Test Coverage - Master
           message: ${{ steps.coverage.outputs.coverage }}
           valColorRange: ${{ steps.coverage.outputs.coverage_value }}
           maxColorRange: 90
@@ -63,7 +63,7 @@ jobs:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 933444616076e2b4ed18818dc7c907d5
           filename: coverage-PR.json
-          label: Test Coverage
+          label: Test Coverage - PRs
           message: ${{ steps.coverage.outputs.coverage }}
           valColorRange: ${{ steps.coverage.outputs.coverage_value }}
           maxColorRange: 90
