@@ -5,8 +5,6 @@ on:
     branches:
       - master
   pull_request:
-    branches:
-      - master
 
 jobs:
   build:
@@ -37,6 +35,7 @@ jobs:
           echo "coverage=$coverage" >> "$GITHUB_OUTPUT"
 
           coverage_value=$(echo $coverage | sed 's/%//')
+          echo "coverage_value=$coverage_value" >> "$GITHUB_OUTPUT"
 
           if (( $(echo "$coverage_value > 80" | bc -l) )); then
             echo "coverage_pass=true" >> "$GITHUB_OUTPUT"
@@ -46,13 +45,29 @@ jobs:
 
       - name: Update coverage badge
         uses: schneegans/dynamic-badges-action@v1.7.0
+        if: github.event_name == 'push' && github.ref_name == github.event.repository.default_branch
         with:
           auth: ${{ secrets.GIST_SECRET }}
           gistID: 933444616076e2b4ed18818dc7c907d5
           filename: coverage-master.json
           label: Test Coverage
           message: ${{ steps.coverage.outputs.coverage }}
-          color: ${{ steps.coverage.outputs.coverage_pass == 'true' && '#2db64c' || 'red' }}
+          valColorRange: ${{ steps.coverage.outputs.coverage_value }}
+          maxColorRange: 90
+          minColorRange: 50
+
+      - name: Update PR coverage badge
+        uses: schneegans/dynamic-badges-action@v1.7.0
+        if: github.event_name == 'pull_request' && github.base_ref == github.event.repository.default_branch
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 933444616076e2b4ed18818dc7c907d5
+          filename: coverage-PR.json
+          label: Test Coverage
+          message: ${{ steps.coverage.outputs.coverage }}
+          valColorRange: ${{ steps.coverage.outputs.coverage_value }}
+          maxColorRange: 90
+          minColorRange: 50
 
       - name: Print coverage result
         if: success()
