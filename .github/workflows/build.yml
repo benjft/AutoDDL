@@ -46,7 +46,7 @@ jobs:
           coverage=$(go tool cover -func=coverage.out | grep "^total:" | awk '{print $3}')
           echo "coverage=$coverage" >> "$GITHUB_OUTPUT"
 
-          coverage_value=$(echo $coverage_result | sed 's/%//')
+          coverage_value=$(echo $coverage | sed 's/%//')
 
           if (( $(echo "$coverage_value > 80" | bc -l) )); then
             echo "coverage_pass=true" >> "$GITHUB_OUTPUT"
@@ -61,7 +61,7 @@ jobs:
           gistID: 933444616076e2b4ed18818dc7c907d5
           filename: coverage-master.json
           label: Test Coverage
-          message: ${{ steps.coverage.outputs.coverage }}%
+          message: ${{ steps.coverage.outputs.coverage }}
           color: ${{ steps.coverage.outputs.coverage_pass == 'true' && 'green' || 'red' }}
 
       - name: Print coverage result
