@@ -3,7 +3,7 @@ name: Go Build and Test
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
       - main
@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: 1.22
 
@@ -40,11 +40,29 @@ jobs:
       - name: Run tests with coverage
         run: go test -v -coverprofile=coverage.out ./...
 
-      - name: Upload test coverage result
-        uses: actions/upload-artifact@v3
+      - name: Get coverage percent
+        id: coverage
+        run: |
+          coverage=(go tool cover -func=coverage.out | grep "^total:" | awk '{print $3}')
+          echo "coverage=$coverage" >> "$GITHUB_OUTPUT"
+
+          coverage_value=$(echo $coverage_result | sed 's/%//')
+
+          if (( $(echo "$coverage_value > 80" | bc -l) )); then
+            echo "coverage_pass=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "coverage_pass=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update coverage badge
+        uses: schneegans/dynamic-badges-action@v1.7.0
         with:
-          name: coverage-report
-          path: coverage.out
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: 933444616076e2b4ed18818dc7c907d5
+          filename: coverage-master.json
+          label: Test Coverage
+          message: ${{ steps.coverage.outputs.coverage }}%
+          color: ${{ steps.coverage.outputs.coverage_pass == 'true' && 'green' || 'red' }}
 
       - name: Print coverage result
         if: success()
