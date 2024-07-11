@@ -1,5 +1,9 @@
-[![Go Build and Test](https://github.com/benjft/AutoDDL/actions/workflows/build.yml/badge.svg)](https://github.com/benjft/AutoDDL/actions/workflows/build.yml)
-[![codecov](https://codecov.io/github/benjft/AutoDDL/graph/badge.svg?token=VFT43YY90I)](https://codecov.io/github/benjft/AutoDDL)
+[
+![GitHub branch check runs](https://img.shields.io/github/check-runs/benjft/AutoDDL/master?logo=github)
+](https://github.com/benjft/AutoDDL/actions/workflows/build.yml)
+[
+![Codecov](https://img.shields.io/codecov/c/github/benjft/AutoDDL?logo=codecov)
+](https://codecov.io/github/benjft/AutoDDL)
 
 # AutoDDL
 This project is not ready yet!
