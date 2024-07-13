@@ -23,7 +23,7 @@ var (
 	config12 = &Config{
 		Database: DatabaseConfig{
 			Host:     "localhost",
-			Port:     "1234",
+			Port:     "5432",
 			User:     "userName",
 			Password: "userPassword",
 			Database: "databaseName",
