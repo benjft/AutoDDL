@@ -5,22 +5,38 @@ import (
 	"testing"
 )
 
+const (
+	configString1 = "database:\n  host: localhost\n  port: 5432\n  user: root\n  password: pass\n  database: testDb"
+	configString2 = "database:\n  database: databaseName\n  user: userName\n  password: userPassword"
+)
+
+var (
+	config1 = &Config{
+		Database: DatabaseConfig{
+			Host:     "localhost",
+			Port:     "5432",
+			User:     "root",
+			Password: "pass",
+			Database: "testDb",
+		},
+	}
+	config12 = &Config{
+		Database: DatabaseConfig{
+			Host:     "localhost",
+			Port:     "5432",
+			User:     "userName",
+			Password: "userPassword",
+			Database: "databaseName",
+		},
+	}
+)
+
 func TestLoadConfigFromFiles(t *testing.T) {
 	t.Run("a single config file should match the generated result",
 		func(t *testing.T) {
 			var (
-				configs = []string{
-					"database:\n  host: localhost\n  port: 5432\n  user: root\n  password: pass\n  database: testDb",
-				}
-				expected = &Config{
-					Database: DatabaseConfig{
-						Host:     "localhost",
-						Port:     "5432",
-						User:     "root",
-						Password: "pass",
-						Database: "testDb",
-					},
-				}
+				configs  = []string{configString1}
+				expected = config1
 			)
 
 			cfg, err := runTestLoadConfigFromFiles(configs)
@@ -36,19 +52,8 @@ func TestLoadConfigFromFiles(t *testing.T) {
 	t.Run("using multiple config files should apply their members in order",
 		func(t *testing.T) {
 			var (
-				configs = []string{
-					"database:\n  host: localhost\n  port: 1234\n  user: root\n  password: pass\n  database: testDb",
-					"database:\n  database: databaseName\n  user: userName\n  password: userPassword",
-				}
-				expected = &Config{
-					Database: DatabaseConfig{
-						Host:     "localhost",
-						Port:     "1234",
-						User:     "userName",
-						Password: "userPassword",
-						Database: "databaseName",
-					},
-				}
+				configs  = []string{configString1, configString2}
+				expected = config12
 			)
 
 			cfg, err := runTestLoadConfigFromFiles(configs)
@@ -100,17 +105,9 @@ func TestLoadConfigFromFiles(t *testing.T) {
 	t.Run("if at least one config file is not missing, config should be generated but an error also returned",
 		func(t *testing.T) {
 			var (
-				missingFile = "THIS_FILE_DOES_NOT_EXIST.yml"
-				config      = "database:\n  host: localhost\n  port: 5432\n  user: root\n  password: pass\n  database: testDb"
-				expected    = &Config{
-					Database: DatabaseConfig{
-						Host:     "localhost",
-						Port:     "5432",
-						User:     "root",
-						Password: "pass",
-						Database: "testDb",
-					},
-				}
+				missingFile     = "THIS_FILE_DOES_NOT_EXIST.yml"
+				config          = configString1
+				expected        = config1
 				configFile, err = makeTempFile(config)
 			)
 
